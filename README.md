@@ -36,7 +36,7 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha }}
       - name: Set up Python with Debug
-        uses: danyeaw/setup-github-debug/.github/actions/debug_python@main
+        uses: danyeaw/setup-github-debug/action.yml@main
         with:
           python-version: ${{ env.python_version }}
 ```
