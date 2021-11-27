@@ -50,7 +50,7 @@ runs:
     - name: Copy Python Debug Module to Cache
       if: steps.cache-python.outputs.cache-hit != 'true'
       run: |
-        cp ${{ runner.workspace }}/dl/Python-${{ inputs.python-version }}/python-dbg.py $RUNNER_TOOL_CACHE/Python/${{ inputs.python-version }}/
+        cp ${{ runner.workspace }}/dl/Python-${{ inputs.python-version }}/python-gdb.py $RUNNER_TOOL_CACHE/Python/${{ inputs.python-version }}/
       shell: bash
 
     - name: Install Python
@@ -70,7 +70,7 @@ runs:
     - name: Copy Python Debug Module to Workspace and Add to GDB
       if: steps.cache-python.outputs.cache-hit != 'true'
       run: |
-        cp $RUNNER_TOOL_CACHE/Python/${{ inputs.python-version }}/python-dbg.py $GITHUB_WORKSPACE/
+        cp $RUNNER_TOOL_CACHE/Python/${{ inputs.python-version }}/python-gdb.py $GITHUB_WORKSPACE/
         echo "add-auto-load-safe-path $GITHUB_WORKSPACE" >> ~/.gdbinit
       shell: bash
 
