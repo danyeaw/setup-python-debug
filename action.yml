@@ -47,12 +47,6 @@ runs:
         ./configure --with-pydebug --prefix=$RUNNER_TEMP/Python/ && make -j && make install
       shell: bash
 
-    - name: Copy Python gdb Module to Cache
-      if: steps.cache-python.outputs.cache-hit != 'true'
-      run: |
-        cp ${{ runner.workspace }}/dl/Python-${{ inputs.python-version }}/python-gdb.py $RUNNER_TOOL_CACHE/Python/${{ inputs.python-version }}/
-      shell: bash
-
     - name: Install Python in the Runner Tools
       if: steps.cache-python.outputs.cache-hit != 'true'
       run: |
@@ -119,6 +113,12 @@ runs:
         touch $PYTHON_TOOLCACHE_VERSION_PATH/x64.complete
       shell: bash
 
+    - name: Copy Python gdb Module to Cache
+      if: steps.cache-python.outputs.cache-hit != 'true'
+      run: |
+        cp ${{ runner.workspace }}/dl/Python-${{ inputs.python-version }}/python-gdb.py $RUNNER_TOOL_CACHE/Python/${{ inputs.python-version }}/x64/
+      shell: bash
+
     - name: Add Python to path
       run: |
         echo "$RUNNER_TOOL_CACHE/Python/${{ inputs.python-version }}/x64/bin" >> $GITHUB_PATH
@@ -127,9 +127,8 @@ runs:
       shell: bash
 
     - name: Copy Python gdb Module to Workspace and Add to gdbinit
-      if: steps.cache-python.outputs.cache-hit != 'true'
       run: |
-        cp $RUNNER_TOOL_CACHE/Python/${{ inputs.python-version }}/python-gdb.py $GITHUB_WORKSPACE/
+        cp $RUNNER_TOOL_CACHE/Python/${{ inputs.python-version }}/x64/python-gdb.py $GITHUB_WORKSPACE/
         echo "add-auto-load-safe-path $GITHUB_WORKSPACE" >> ~/.gdbinit
       shell: bash
 
