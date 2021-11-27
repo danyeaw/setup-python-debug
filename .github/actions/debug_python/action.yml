@@ -4,10 +4,6 @@ inputs:
   python-version:
     description: 'Python version to build'
     required: true
-  xvfb_command:
-    description: 'Command to run for xvfb in order to run tests headless in Linux'
-    required: false
-    default: ''
 runs:
   using: composite
   steps:
@@ -23,9 +19,9 @@ runs:
       uses: carlosperate/download-file-action@v1.0.3
       id: download-python
       with:
-       file-url: 'https://www.python.org/ftp/python/${{ inputs.python-version }}/Python-${{ inputs.python-version }}.tar.xz'
-       file-name: 'Python-${{ inputs.python-version }}.tar.xz'
-       location: '${{ runner.workspace }}/dl/'
+        file-url: 'https://www.python.org/ftp/python/${{ inputs.python-version }}/Python-${{ inputs.python-version }}.tar.xz'
+        file-name: 'Python-${{ inputs.python-version }}.tar.xz'
+        location: '${{ runner.workspace }}/dl/'
 
     - name: Enable Source Repository
       if: steps.cache-python.outputs.cache-hit != 'true'
@@ -51,9 +47,16 @@ runs:
         ./configure --with-pydebug --prefix=$RUNNER_TEMP/Python/ && make -j && make install
       shell: bash
 
-    - name: Install Python
+    - name: Copy Python Debug Module to Cache
+      if: steps.cache-python.outputs.cache-hit != 'true'
       run: |
-        export PYTHON_FULL_VERSION=${{ inputs.python-version }}
+        cp ${{ runner.workspace }}/dl/Python-${{ inputs.python-version }}/python-dbg.py $RUNNER_TOOL_CACHE/Python/${{ inputs.python-version }}/
+      shell: bash
+
+    - name: Install Python
+      if: steps.cache-python.outputs.cache-hit != 'true'
+      run: |
+        sed -i 's/{{__VERSION_FULL__}}/${{ inputs.python-version }}/' .github/scripts/setup_debug_python.sh
         .github/scripts/setup_debug_python.sh
       shell: bash
 
@@ -64,21 +67,13 @@ runs:
         echo "$GITHUB_PATH"
       shell: bash
 
-    - name: Display Python version
-      run: $RUNNER_TOOL_CACHE/Python/${{ inputs.python-version }}/x64/bin/python -c "import sys; print(sys.version)"
+    - name: Copy Python Debug Module to Workspace and Add to GDB
+      if: steps.cache-python.outputs.cache-hit != 'true'
+      run: |
+        cp $RUNNER_TOOL_CACHE/Python/${{ inputs.python-version }}/python-dbg.py $GITHUB_WORKSPACE/
+        echo "add-auto-load-safe-path $GITHUB_WORKSPACE" >> ~/.gdbinit
       shell: bash
 
-    - name: Install Poetry
-      run: $RUNNER_TOOL_CACHE/Python/${{ inputs.python-version }}/x64/bin/python -m pip install poetry==1.1.11
-      shell: bash
-    - name: Configure Poetry
-      run: poetry config virtualenvs.in-project true
-      shell: bash
-    - name: Install Python Dependencies
-      run: poetry install
-      shell: bash
-    - name: Setup tmate session
-      uses: mxschmitt/action-tmate@v3
-    - name: Test with Pytest
-      run: ${{ inputs.xvfb_command }} poetry run poe test-all
+    - name: Display Python version
+      run: python -c "import sys; print(sys.version)"
       shell: bash

@@ -27,7 +27,7 @@
 
 set -e
 
-# PYTHON_FULL_VERSION="{{__VERSION_FULL__}}"
+PYTHON_FULL_VERSION="{{__VERSION_FULL__}}"
 MAJOR_VERSION=$(echo $PYTHON_FULL_VERSION | cut -d '.' -f 1)
 MINOR_VERSION=$(echo $PYTHON_FULL_VERSION | cut -d '.' -f 2)
 
