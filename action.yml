@@ -133,5 +133,8 @@ runs:
       shell: bash
 
     - name: Display Python version
-      run: python -c "import sys; print(sys.version)"
-      shell: bash
+      run: |
+        import sys
+        print(sys.version)
+        print("Debug build?", hasattr(sys, 'gettotalrefcount'))
+      shell: python
